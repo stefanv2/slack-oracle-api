@@ -14,7 +14,7 @@ Een eenvoudige Node.js API in Docker die postcodegegevens uit een Oracle-databas
 
 ## ⚙️ Voorwaarden
 
-- Oracle-database met een tabel `KTB_PCDATA` die adresgegevens bevat
+- Oracle-database met een tabel `POSTCODE_TABLE` die adresgegevens bevat
 - Werkende tunnel of netwerkverbinding tussen je API-server en Oracle
 - Slack-account + Slack App
 - (Optioneel) Google Maps Static API key
