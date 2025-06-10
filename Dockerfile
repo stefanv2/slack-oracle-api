@@ -30,6 +30,6 @@ COPY . .
 
 # Default port (pas aan indien je een andere gebruikt)
 EXPOSE 3000
-
+COPY oracle_wallet_client ./oracle_wallet_client
 CMD [ "node", "index.js" ]
 COPY .env .env
