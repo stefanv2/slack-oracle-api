@@ -7,10 +7,6 @@ Deze route geeft willekeurige uitspraken van Olivier B. Bommel terug. Leuk als k
 ## Voorbeeldgebruik:
 /quote
 
-yaml
-Kopiëren
-Bewerken
-
 ---
 
 ## Mogelijke quotes:
@@ -43,9 +39,5 @@ const quotes = [
 ];
 const quote = quotes[Math.floor(Math.random() * quotes.length)];
 Laat je innerlijke heer spreken… of een handige jonge vriend.
-
-yaml
-Kopiëren
-Bewerken
 
 ---

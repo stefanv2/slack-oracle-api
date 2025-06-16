@@ -11,10 +11,6 @@ Een overzicht van alle beschikbare slash-commando's in deze Slack-integratie met
 ### Voorbeeld:
 /postcode 1234AB
 
-markdown
-Kopiëren
-Bewerken
-
 ### Resultaat:
 - Straatnaam
 - Plaatsnaam
@@ -44,10 +40,6 @@ Bewerken
 ### Voorbeeld:
 /grafiek gemiddeld-oppervlakte-gemeente
 
-yaml
-Kopiëren
-Bewerken
-
 ---
 
 ## `/quote`
@@ -56,10 +48,6 @@ Bewerken
 
 ### Voorbeeld:
 /quote
-
-yaml
-Kopiëren
-Bewerken
 
 ### Resultaat:
 > *"Als je begrijpt wat ik bedoel..." — O.B. Bommel*
