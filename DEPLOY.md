@@ -4,7 +4,7 @@ In dit document leggen we uit hoe je de Slack Oracle Bot correct kunt deployen i
 
 ### 🛠️ Benodigdheden
 
-- Oracle Database met toegang tot tabel `KTB_PCDATA`
+- Oracle Database met toegang tot tabel `POSTCODE`
 - Slack App met geconfigureerde slash commands
 - Docker geïnstalleerd op je server
 - Ngrok of andere tunneling-service
