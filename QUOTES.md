@@ -49,5 +49,3 @@ Kopiëren
 Bewerken
 
 ---
-
-Laat me weten of je ook een `DB_SCHEMA.md` of `DEPLOY.md` wilt! Ik zet die ook zo in elkaar.
