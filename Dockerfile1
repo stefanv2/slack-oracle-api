@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 # Set environment variables for Oracle Instant Client
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient
 
-# Download Oracle Instant Client basic & SDK
+# Download Oracle Instant Client basic & SDK (adjust versions if needed)
 COPY instantclient-basiclite-linux.x64-19.27.0.0.0dbru.zip /tmp/
 COPY instantclient-sdk-linux.x64-19.27.0.0.0dbru.zip /tmp/
 
@@ -28,17 +28,8 @@ RUN npm install
 # Copy app source code
 COPY . .
 
-# Oracle wallet if applicable
-#COPY oracle_wallet_client ./oracle_wallet_client
-
-# Optional environment file
-COPY .env .env
-
-# 🔥 Maak de poort dynamisch via ENV
-ARG PORT=3000
-ENV PORT=${PORT}
-EXPOSE ${PORT}
-
-# Start de app
+# Default port (pas aan indien je een andere gebruikt)
+EXPOSE 3000
+COPY oracle_wallet_client ./oracle_wallet_client
 CMD [ "node", "index.js" ]
-
+COPY .env .env
