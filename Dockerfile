@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y \
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient
 
 # Download Oracle Instant Client basic & SDK
-COPY instantclient-basiclite-linux.x64-19.27.0.0.0dbru.zip /tmp/
-COPY instantclient-sdk-linux.x64-19.27.0.0.0dbru.zip /tmp/
+COPY software/instantclient-basiclite-linux.x64-19.27.0.0.0dbru.zip /tmp/
+COPY software/instantclient-sdk-linux.x64-19.27.0.0.0dbru.zip /tmp/
 
 RUN mkdir -p /opt/oracle && \
     unzip -o /tmp/instantclient-basiclite-linux.x64-19.27.0.0.0dbru.zip -d /opt/oracle/ && \

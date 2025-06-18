@@ -17,10 +17,9 @@ const poolConfig = {
   poolIncrement: 1,
 };
 
-const slackRoutes = require('./routes/slack');
-app.use('/slack', slackRoutes);
-
-app.post('/postcode', async (req, res) => {
+if (process.env.SERVICE === 'postcode') {
+  app.post('/postcode', async (req, res) => {
+    // je bestaande postcode handler (ongewijzigd!)
   const start = Date.now();
   const input = req.body.text || '';
   const match = input.trim().toUpperCase().match(/^([0-9]{4})([A-Z]{2})$/);
@@ -80,6 +79,13 @@ app.post('/postcode', async (req, res) => {
     console.log(`⏱️  Verwerking duurde ${duration} ms`);
   }
 });
+
+}
+
+if (process.env.SERVICE === 'quotegrafiek') {
+  const slackRoutes = require('./routes/slack');
+  app.use('/slack', slackRoutes);
+}
 
 async function init() {
   try {

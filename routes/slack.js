@@ -116,8 +116,7 @@ Grafiek: *${label}*`
   }
 });
 
-router.post('/quote', async (req, res) => {
-	  const quotes = [
+const quotes = [
   "Als je begrijpt wat ik bedoel.",
   "Tom Poes, verzin een list!",
   "Geld speelt geen rol.",
@@ -128,12 +127,190 @@ router.post('/quote', async (req, res) => {
   "Ik heb het altijd al gezegd.",
   "Ik wil rust in mijn leven!",
   "Het is allemaal de schuld van de maatschappij.",
+  "Een heer doet dit niet.",
+  "Er zijn grenzen, jonge vriend!",
+  "Ik heb altijd gelijk gehad, maar niemand luisterde.",
+  "Ik wil gewoon mijn leven leiden op mijn eigen manier.",
+  "Kijk, daar gaat het mij nu juist om!",
+  "Wat een toestand, Tom Poes!",
+  "En dan heb ik het nog niet eens over de belasting!",
+  "Dat is allemaal heel mooi, maar wat schiet ik ermee op?",
+  "Het is niet mijn schuld, ik ben er ingerommeld!",
+  "Rustig aan, ik ben een oud man.",
+  "Een heer van stand maakt zich niet druk.",
+  "Laat mij maar gewoon mijn gang gaan.",
+  "Dit loopt vast weer slecht af.",
+  "Zo is het altijd, als ik iets probeer te doen.",
+  "Wat een toestand, en ik had net mijn jas laten stomen.",
+  "Ik ben met de beste bedoelingen begonnen, maar zie nu waar ik ben beland!",
+  "Ach jonge vriend, vroeger was alles simpeler — en duurder.", 
+  "Ik wil geen gedoe, ik wil beschaving!",
+  "Het is begonnen met een klein plan, en kijk nou eens...",
+  "Een heer hoeft niet uit te leggen waarom hij gelijk heeft.",
+  "Het was niet mijn schuld, ik stond erbij en keek ernaar.",
+  "Ik wilde gewoon een rustige dag. Is dat te veel gevraagd?",
+  "Soms denk ik: was ik maar een gewone beer gebleven.",
+  "En ik zeg het u: ik ben er ingeluisd!",
+  "Ik heb geen zin in narigheid, Tom Poes.",
+  "Waarom moet mij dit altijd overkomen?",
+  "Zoals gewoonlijk wordt er weer niet naar mij geluisterd.",
+  "Dit riekt naar een complot tegen mijn persoon.",
+  "Ik wil alleen maar met rust gelaten worden, is dat zo vreemd?",
+  "Ik ben een man van principes, al heb ik ze niet altijd helder.",
+  "Ongemak is mijn trouwe metgezel geworden.",
+  "Ik ben een heer van stand, geen avonturier!",
+  "Soms is het leven ingewikkelder dan een belastingformulier.",
+  "Het begon als een goed idee, maar toen kwam de werkelijkheid.",
+  "Ik had dit allemaal kunnen voorkomen, maar niemand vroeg het mij.",
+  "Als ik geweten had waar ik aan begon, was ik thuisgebleven.",
+  "Ik dacht even gelukkig te zijn, maar dat was van korte duur.",
+  "Beschaving, Tom Poes! Dat is wat deze wereld nodig heeft!",
+  "Ik vraag weinig, maar zelfs dat lijkt te veel.",
+  "Mijn plan was feilloos... tot de uitvoering begon.",
+  "Men vergeet dat ik óók gevoelens heb.",
+  "Het zou allemaal zo mooi kunnen zijn, als men mij gewoon mijn zin gaf."
 ];
-const quote = quotes[Math.floor(Math.random() * quotes.length)]; 
-   res.json({
-   response_type: "ephemeral",
-   text: `📜 *Bommel zegt:* "${quote}"`
-		    });
+
+router.post('/quote', async (req, res) => {
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  res.json({
+    response_type: "in_channel",
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `📜 *Bommel zegt:* \"${quote}\"`
+        }
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "🎲 Nieuwe quote"
+            },
+            action_id: "new_quote"
+          }
+        ]
+      }
+    ]
+  });
+});
+
+router.post('/quote-action', async (req, res) => {
+  const payload = JSON.parse(req.body.payload);
+  const action = payload.actions[0];
+
+  if (action.action_id === 'new_quote') {
+    const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    await axios.post(payload.response_url, {
+      replace_original: true,
+      response_type: 'in_channel',
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `📜 *Bommel zegt:* \"${newQuote}\"`
+          }
+        },
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                text: "🎲 Nieuwe quote"
+              },
+              action_id: "new_quote"
+            }
+          ]
+        }
+      ]
+    });
+    res.status(200).end();
+  }
+});
+
+router.post('/adres', async (req, res) => {
+const { text } = req.body;
+
+  if (!text || text.trim().split(' ').length < 2) {
+    return res.json({
+      response_type: 'ephemeral',
+      text: '❗Gebruik: `/adres <straatnaam> <plaatsnaam>` (bijv. `/adres Dam Amsterdam`)'
+    });
+  }
+
+const onderdelen = text.trim().split(' ');
+const plaats = onderdelen.pop().toLowerCase();
+const straat = onderdelen.join(' ').toLowerCase();
+
+  res.json({
+    response_type: 'ephemeral',
+    text: `🔎 Zoeken naar adres: *${straat}* in *${plaats}*...`
+  });
+
+  try {
+    const conn = await oracledb.getConnection();
+    const result = await conn.execute(
+      `SELECT STRAATNAAM, PLAATSNAAM, BREEDTEGRAAD, LENGTEGRAAD
+       FROM POSTMAN.KTB_PCDATA
+       WHERE LOWER(STRAATNAAM) = :straat AND LOWER(PLAATSNAAM) = :plaats
+       FETCH FIRST 1 ROWS ONLY`,
+      { straat, plaats },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (result.rows.length === 0) {
+      await axios.post(req.body.response_url, {
+        response_type: 'ephemeral',
+        text: `❌ Geen resultaat gevonden voor *${straat}*, *${plaats}*.`
+      });
+      return;
+    }
+
+    const { STRAATNAAM, PLAATSNAAM, BREEDTEGRAAD, LENGTEGRAAD } = result.rows[0];
+    const kaartUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${BREEDTEGRAAD},${LENGTEGRAAD}&zoom=16&size=600x300&markers=color:orange%7C${BREEDTEGRAAD},${LENGTEGRAAD}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+
+    await axios.post(req.body.response_url, {
+      response_type: 'in_channel',
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `📍 *Adres gevonden:*\n*Straat:* ${STRAATNAAM}\n*Plaats:* ${PLAATSNAAM}`
+          }
+        },
+        {
+          type: 'image',
+          image_url: kaartUrl,
+          alt_text: 'Kaartweergave van adres'
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: '_Als je begrijpt wat ik bedoel..._'
+            }
+          ]
+        }
+      ]
+    });
+  } catch (err) {
+    console.error('❌ Fout bij adreszoeking:', err);
+    await axios.post(req.body.response_url, {
+      response_type: 'ephemeral',
+      text: `❌ Fout bij zoeken naar adres: ${err.message}`
+    });
+  }
 });
 
 module.exports = router;
