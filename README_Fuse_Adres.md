@@ -72,7 +72,7 @@ Je kunt extra velden toevoegen aan fuse-data.json, zoals lengtegraad en breedteg
  Logging naar file of Slack.
 
  Automatische herbouw van JSON via cronjob.
-
+```
 ## 🔄 Stroomdiagram Slack /adres
 
 ![Slack adres flow](docs/Fuse_Adres.png)
