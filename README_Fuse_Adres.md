@@ -9,6 +9,7 @@ Je krijgt dan als resultaat het juiste adres met postcode en locatie inclusief e
 
 ## ⚙️ Structuur
 
+```plaintext
 slack-oracle-api/
 ├── adresbot/
 │ ├── fuseHelper.js # Laadt de JSON-data in een Fuse.js index
@@ -17,6 +18,7 @@ slack-oracle-api/
 │ ├── slack-adres.js # Slack router die /adres commando afhandelt (fuzzy + async + Google Maps)
 │ └── index-adres.js # Start je Express server met Fuse.js integratie
 
+```
 
 ---
 
@@ -71,4 +73,4 @@ Je kunt extra velden toevoegen aan fuse-data.json, zoals lengtegraad en breedteg
 
  Automatische herbouw van JSON via cronjob.
 
-
+```
