@@ -32,13 +32,13 @@ COPY . .
 #COPY oracle_wallet_client ./oracle_wallet_client
 
 # Optional environment file
-COPY .env .env
+COPY .env .env .env.adres
 
 # 🔥 Maak de poort dynamisch via ENV
-ARG PORT=3000
+ARG PORT=3002
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # Start de app
-CMD [ "node", "index.js" ]
+CMD [ "node", "index-adres.js" ]
 
