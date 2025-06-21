@@ -1,6 +1,11 @@
 # 📜 Bommel Quotes
 
 Deze route geeft willekeurige uitspraken van Olivier B. Bommel terug. Leuk als knipoog of om je Slackbot wat karakter te geven.
+---
+
+<p align="center">
+<img src="/docs/bommel.png" alt="BTOP" width="120" height="160"/>  
+</p>
 
 ---
 
