@@ -8,6 +8,10 @@ Een eenvoudige Node.js API in Docker die postcodegegevens uit een Oracle-databas
 <img src="docs/Slack-RGB.png" alt="BTOP" width="120" height="120"/>  
 </p>
 
+<p align="center">
+  <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExc21obTk1d3Ztd2M2bnhvZHh2cW11azN0eHhyOWgycHR3MjR0MXYxZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NVYJDvaFbx16ClIfIV/giphy.gif" alt="Pixel route" width="300"/>
+</p>
+
 ---
 
 
