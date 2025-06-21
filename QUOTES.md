@@ -4,7 +4,7 @@ Deze route geeft willekeurige uitspraken van Olivier B. Bommel terug. Leuk als k
 ---
 
 <p align="center">
-<img src="docs/bommel.png" alt="BTOP"/>  
+<img src="docs/bommel.png" alt="BTOP" width="200" height="275"/>  
 </p>
 
 ---
