@@ -2,6 +2,15 @@
 
 Een eenvoudige Node.js API in Docker die postcodegegevens uit een Oracle-database ophaalt, ontworpen voor gebruik met een Slack slash command zoals `/postcode`.
 
+---
+
+<p align="center">
+<img src="docs/Slack-RGB.png" alt="BTOP" width="120" height="120"/>  
+</p>
+
+---
+
+
 ## 🚀 Features
 
 - ✅ Zoekt straat- en plaatsnamen op uit een Oracle-database
