@@ -107,7 +107,7 @@ node_modules/
 ---
 
 <p align="center">
-<img src="docs/bommel_tompoes.png.png" alt="BTOP" width="200" height="200"/>  
+<img src="docs/bommel_tompoes.png" alt="BTOP" width="200" height="200"/>  
 </p>
 
 
