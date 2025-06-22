@@ -104,6 +104,13 @@ node_modules/
     502 of geen antwoord?
     → Controleer of Docker-container draait en luistert op poort 3000
 
+---
+
+<p align="center">
+<img src="docs/bommel_tompoes.png.png" alt="BTOP" width="200" height="200"/>  
+</p>
+
+
 👨‍💻 Auteur
 
 Gemaakt door Stefan Voorbij
