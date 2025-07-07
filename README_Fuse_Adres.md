@@ -76,3 +76,56 @@ Je kunt extra velden toevoegen aan fuse-data.json, zoals lengtegraad en breedteg
 ## 🔄 Stroomdiagram Slack /adres
 
 ![Slack adres flow](docs/Fuse_Adres.png)
+
+
+🔍 Uitbreiding /adres – Postcode opzoeken op basis van adres
+Met deze uitbreiding op het bestaande /adres Slack-commando is het nu mogelijk om de postcode en locatie op te vragen op basis van een straatnaam, plaatsnaam en optioneel een huisnummer. De functionaliteit maakt gebruik van:
+
+🔎 Fuzzy zoekfunctie via Fuse.js
+
+🗃️ Realtime Oracle-query (indien huisnummer bekend is)
+
+🗺️ Google Maps kaartweergave van de locatie (indien coördinaten beschikbaar zijn)
+
+✅ Gebruik
+Zonder huisnummer (fuzzy match):
+
+/adres Lutherlaan Haarlem
+Geeft:
+
+Straatnaam
+
+Plaats
+
+Postcode (indien beschikbaar)
+
+📍 Google Maps kaartje (indien coördinaten in de fuse-data.json aanwezig zijn)
+
+Met huisnummer (database lookup):
+
+/adres Lutherlaan 203 Haarlem
+Geeft:
+
+Straat, plaats en huisnummer
+
+Exacte postcode (samengesteld uit WIJKCODE + LETTERCOMBINATIE)
+
+📍 Google Maps kaartje (op basis van BREEDTEGRAAD en LENGTEGRAAD)
+
+🛠️ Technisch overzicht
+Fuzzy matching op straat + plaats via fuse-data.json
+
+Bij opgegeven huisnummer → directe Oracle-query op KTB_PCDATA
+
+Gegevens zoals WIJKCODE, LETTERCOMBINATIE, BREEDTEGRAAD, LENGTEGRAAD worden opgehaald
+
+Kaartje gegenereerd via de Google Static Maps API
+
+🔧 Nog in ontwikkeling
+ fuse-data.json verrijken met meer coördinaten en postcodes
+
+ Betere fallback wanneer coördinaten ontbreken
+
+ Ondersteuning voor huisnummertoevoegingen zoals 1A, 2-B etc.
+
+Laat maar weten als je dit ook meteen als commit comment wil gebruiken, dan help ik met pushen via Git ook als je wilt! 💪
