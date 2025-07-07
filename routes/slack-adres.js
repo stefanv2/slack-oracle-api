@@ -6,97 +6,142 @@ const { getFuseInstance } = require('../tools/fuseHelper');
 
 router.post('/slack/adres', async (req, res) => {
   const { text, response_url } = req.body;
-  const parts = text.toLowerCase().trim().split(/\s+/);
-if (parts.length < 2) {
-  // Reageer snel binnen 3 sec!
-  res.json({
-    response_type: 'ephemeral',
-    text: `❌ Geef een straat én plaats op, bijvoorbeeld: \`/adres lutherlaan haarlem\``
-  });
-  return;
-}
+  console.log('🔔 Slack input ontvangen:', text);
 
-const [straat, plaats] = parts;
-
-  res.json({
-    response_type: 'ephemeral',
-    text: `⏳ Even geduld... adres voor *${straat} ${plaats}* wordt opgezocht.`
-  });
-
-  const fuse = getFuseInstance();
-  if (!fuse) {
-    await axios.post(response_url, {
+  if (!text || text.trim().length < 3) {
+    return res.json({
       response_type: 'ephemeral',
-      text: '❌ Interne fout: Fuse.js is niet geladen.'
+      text: '❌ Gebruik: `/adres <straat> [huisnummer] <plaats>`'
     });
-    return;
   }
 
-  const result = fuse.search({ straat, plaats }, { limit: 1 });
+  const parts = text.toLowerCase().trim().split(/\s+/);
+  let straat = '';
+  let plaats = '';
+  let huisnummer = null;
+  let huisletter = null;
 
-  if (result.length === 0) {
-    await axios.post(response_url, {
-      response_type: 'in_channel',
-      text: `❌ Geen resultaat gevonden voor *${straat}*, *${plaats}*.`
-    });
-    return;
+  if (parts.length >= 3 && /^\d+[a-z]?$/.test(parts[parts.length - 2])) {
+    plaats = parts.pop();
+    const huisnrRaw = parts.pop();
+    const match = huisnrRaw.match(/^(\d+)([a-z]?)$/);
+    if (match) {
+      huisnummer = match[1];
+      huisletter = match[2] || null;
+    }
+    straat = parts.join(' ');
+  } else {
+    plaats = parts.pop();
+    straat = parts.join(' ');
   }
 
-  const match = result[0].item;
-  const { straat: matchedStraat, plaats: matchedPlaats, postcode } = match;
+  console.log(`➡️ Parsed straat: ${straat}`);
+  console.log(`➡️ Parsed plaats: ${plaats}`);
+  console.log(`➡️ Parsed huisnummer: ${huisnummer || ''}${huisletter || ''}`);
+
+  res.json({
+    response_type: 'ephemeral',
+    text: `⏳ Bezig met opzoeken van *${straat} ${huisnummer || ''} ${plaats}*...`
+  });
 
   try {
-    const connection = await oracledb.getConnection();
-
-    const dbResult = await connection.execute(
-      `SELECT STRAATNAAM, PLAATSNAAM, BREEDTEGRAAD, LENGTEGRAAD 
-       FROM POSTMAN.KTB_PCDATA 
-       WHERE LOWER(STRAATNAAM) = :straat AND LOWER(PLAATSNAAM) = :plaats 
-       FETCH FIRST 1 ROWS ONLY`,
-      [match.straat, match.plaats],
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
-
-    if (dbResult.rows.length === 0) {
+    const fuse = getFuseInstance();
+    if (!fuse) {
       await axios.post(response_url, {
-        response_type: 'in_channel',
-        text: `❌ Geen locatiegegevens gevonden voor *${match.straat}*, *${match.plaats}*.`
+        response_type: 'ephemeral',
+        text: '❌ Interne fout: Fuse is niet geladen.'
       });
       return;
     }
 
-    const { STRAATNAAM, PLAATSNAAM, BREEDTEGRAAD, LENGTEGRAAD } = dbResult.rows[0];
+    const matches = fuse.search({ straat, plaats });
+    console.log(`🔎 Fuse-resultaten gevonden: ${matches.length}`);
 
-    const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${BREEDTEGRAAD},${LENGTEGRAAD}&zoom=16&size=600x300&markers=color:red%7C${BREEDTEGRAAD},${LENGTEGRAAD}&key=${process.env.GOOGLE_MAPS_API_KEY || ''}`;
+    if (matches.length === 0) {
+      await axios.post(response_url, {
+        response_type: 'in_channel',
+        text: `❌ Geen fuzzy match gevonden voor *${straat} ${plaats}*`
+      });
+      return;
+    }
 
-    await axios.post(response_url, {
-      response_type: 'in_channel',
-      blocks: [
+    const topMatch = matches[0].item;
+    console.log('✅ Beste fuzzy match:', topMatch);
+
+    if (huisnummer) {
+      const connection = await oracledb.getConnection();
+
+      const result = await connection.execute(
+        `SELECT STRAATNAAM, PLAATSNAAM, HUISNR, HUISNR_BAG_LETTER,
+                WIJKCODE || LETTERCOMBINATIE AS POSTCODE,
+                BREEDTEGRAAD, LENGTEGRAAD
+         FROM POSTMAN.KTB_PCDATA
+         WHERE LOWER(STRAATNAAM) = :straat
+           AND LOWER(PLAATSNAAM) = :plaats
+           AND HUISNR = :huisnr
+           AND (LOWER(HUISNR_BAG_LETTER) = :letter OR :letter IS NULL)
+         FETCH FIRST 1 ROWS ONLY`,
         {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `🎩 *"Tom Poes, verzin een list..."*\n📍 *Adres gevonden:*\n• Straat: *${matchedStraat}*\n• Plaats: *${matchedPlaats}*\n• Postcode: *${postcode || 'onbekend'}*\n• Locatie: ${BREEDTEGRAAD}, ${LENGTEGRAAD}`
-
-          }
+          straat: topMatch.straat.toLowerCase(),
+          plaats: topMatch.plaats.toLowerCase(),
+          huisnr: parseInt(huisnummer),
+          letter: huisletter
         },
-        {
-          type: 'image',
-          image_url: staticMapUrl,
-          alt_text: `Locatie op kaart: ${STRAATNAAM}, ${PLAATSNAAM}`
-        }
-      ]
-    });
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
 
-    await connection.close();
+      await connection.close();
+
+      if (result.rows.length > 0) {
+        const r = result.rows[0];
+        const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${r.BREEDTEGRAAD},${r.LENGTEGRAAD}&zoom=16&size=600x300&markers=color:red%7C${r.BREEDTEGRAAD},${r.LENGTEGRAAD}&key=${process.env.GOOGLE_MAPS_API_KEY || ''}`;
+
+        await axios.post(response_url, {
+          response_type: 'in_channel',
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `📍 *Adres gevonden:*\n• Straat: *${r.STRAATNAAM}*\n• Plaats: *${r.PLAATSNAAM}*\n• Huisnummer: *${r.HUISNR}${r.HUISNR_BAG_LETTER || ''}*\n• Postcode: *${r.POSTCODE}*`
+              }
+            },
+            {
+              type: 'image',
+              image_url: staticMapUrl,
+              alt_text: `Kaartlocatie ${r.STRAATNAAM} ${r.HUISNR}`
+            }
+          ]
+        });
+        return;
+      } else {
+        await axios.post(response_url, {
+          response_type: 'in_channel',
+          text: `❌ Geen huisnummer *${huisnummer}${huisletter || ''}* gevonden voor ${topMatch.STRAATNAAM}, ${topMatch.PLAATSNAAM}`
+        });
+        return;
+      }
+    }
+
+// Geen huisnummer → fuzzy match tonen + kaartje
+await axios.post(response_url, {
+  response_type: 'in_channel',
+  text: `🔎 *Fuzzy match:*\n📍 ${topMatch.straat}, ${topMatch.plaats} (${topMatch.postcode || ''})`,
+  attachments: topMatch.BREEDTEGRAAD && topMatch.LENGTEGRAAD ? [
+    {
+      image_url: `https://maps.googleapis.com/maps/api/staticmap?center=${topMatch.BREEDTEGRAAD},${topMatch.LENGTEGRAAD}&zoom=16&size=600x300&markers=color:red%7C${topMatch.BREEDTEGRAAD},${topMatch.LENGTEGRAAD}&key=${GOOGLE_MAPS_API_KEY}`,
+      alt_text: 'Kaartweergave'
+    }
+  ] : []
+});
+
   } catch (err) {
-    console.error('❌ Fout bij ophalen adres:', err);
+    console.error('❌ Fout bij afhandeling:', err);
     await axios.post(response_url, {
       response_type: 'ephemeral',
-      text: '❌ Er ging iets mis bij het ophalen van de locatiegegevens.'
+      text: '❌ Interne fout bij het zoeken van het adres.'
     });
   }
 });
 
 module.exports = router;
-
