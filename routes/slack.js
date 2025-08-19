@@ -168,7 +168,9 @@ const quotes = [
   "Ik vraag weinig, maar zelfs dat lijkt te veel.",
   "Mijn plan was feilloos... tot de uitvoering begon.",
   "Men vergeet dat ik óók gevoelens heb.",
-  "Het zou allemaal zo mooi kunnen zijn, als men mij gewoon mijn zin gaf."
+  "Het zou allemaal zo mooi kunnen zijn, als men mij gewoon mijn zin gaf.",
+  "Men vindt mijn persoons zo keurig dat ik er zelf bijna in ga geloven.",
+  "Ik ben een man van de wereld, maar ik wil wel mijn eigen wereldje behouden."
 ];
 
 router.post('/quote', async (req, res) => {
